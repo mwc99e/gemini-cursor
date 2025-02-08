@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, ipcMain } from "electron";
+import { app, BrowserWindow, Tray, Menu, ipcMain, session } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { CursorController } from "@/apps/cursor/controller";
@@ -15,15 +15,63 @@ let cursorController: CursorController | null = null;
 
 const createControlWindow = () => {
   controlWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 1000,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
       devTools: true,
+      // Enable screen capture and WebRTC features
+      webSecurity: true,
+      sandbox: false,
     },
   });
+
+  // Enable screen capture permissions
+  controlWindow.webContents.session.setPermissionCheckHandler(
+    (webContents, permission) => {
+      const allowedPermissions = [
+        "media",
+        "display-capture",
+        "screen",
+        "desktopCapture",
+      ] as const;
+      return allowedPermissions.includes(
+        permission as (typeof allowedPermissions)[number]
+      );
+    }
+  );
+
+  controlWindow.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      const allowedPermissions = [
+        "media",
+        "display-capture",
+        "screen",
+        "desktopCapture",
+      ] as const;
+      callback(
+        allowedPermissions.includes(
+          permission as (typeof allowedPermissions)[number]
+        )
+      );
+    }
+  );
+
+  // Set additional required permissions
+  controlWindow.webContents.session.webRequest.onHeadersReceived(
+    (details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: mediastream: blob:; connect-src 'self' wss://generativelanguage.googleapis.com ws://generativelanguage.googleapis.com https://generativelanguage.googleapis.com; media-src 'self' mediastream: blob: data:; img-src 'self' data: blob:",
+          ],
+        },
+      });
+    }
+  );
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     controlWindow.loadURL(
@@ -110,10 +158,29 @@ const createCursorWindow = () => {
   tray.setContextMenu(contextMenu);
 };
 
+// Before app.whenReady()
+app.commandLine.appendSwitch("enable-features", "WebRTCPipeWireCapturer");
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // Enable screen capture
+  session.defaultSession.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      const allowedPermissions = [
+        "media",
+        "display-capture",
+        "screen",
+      ] as const;
+      callback(
+        allowedPermissions.includes(
+          permission as (typeof allowedPermissions)[number]
+        )
+      );
+    }
+  );
+
   ipcMain.on("move-right", () => {
     cursorController?.moveRight();
   });

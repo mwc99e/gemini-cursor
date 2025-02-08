@@ -34,7 +34,7 @@ const createControlWindow = () => {
   }
 };
 
-const createWindow = () => {
+const createCursorWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 24, // Small window for the cursor
@@ -57,10 +57,10 @@ const createWindow = () => {
 
   // Load the index.html
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    mainWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/cursor.html`);
   } else {
     mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/cursor.html`)
     );
   }
 
@@ -104,13 +104,11 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Add IPC handler for move-right
   ipcMain.on("move-right", () => {
-    console.log("move-right");
     cursorController?.moveRight();
   });
 
-  createWindow();
+  createCursorWindow();
   createControlWindow();
 });
 
@@ -150,7 +148,7 @@ app.on("activate", () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    createCursorWindow();
   }
 });
 

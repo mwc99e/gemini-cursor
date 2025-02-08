@@ -25,10 +25,3 @@
  *  });
  * ```
  */
-
-import "./styles/cursor.css";
-
-// Add the cursor dot to the page
-const dot = document.createElement("div");
-dot.className = "virtual-cursor";
-document.body.appendChild(dot);

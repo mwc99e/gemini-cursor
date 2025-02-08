@@ -13,16 +13,15 @@ const createWindow = () => {
     width: 24, // Small window for the cursor
     height: 24,
     frame: false,
-    transparent: true,
-    alwaysOnTop: true,
+    backgroundColor: "#D96570",
     resizable: false,
-    movable: false,
-    skipTaskbar: true,
-    focusable: false,
+    hasShadow: false,
+    alwaysOnTop: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
       contextIsolation: false,
+      devTools: false,
     },
   });
 
@@ -40,7 +39,7 @@ const createWindow = () => {
 
   // Move the window in a square pattern
   let x = 100;
-  let y = 100;
+  const y = 100;
 
   setInterval(() => {
     mainWindow.setPosition(x, y);

@@ -1,15 +1,20 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Tray, Menu } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
+import { CursorMovement } from "./cursor-movement";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
+let tray: Tray | null = null;
+let mainWindow: BrowserWindow | null = null;
+let cursorMovement: CursorMovement | null = null;
+
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 24, // Small window for the cursor
     height: 24,
     frame: false,
@@ -37,25 +42,39 @@ const createWindow = () => {
     );
   }
 
-  // Move the window in a square pattern
-  let x = 100;
-  const y = 100;
+  // Initialize cursor movement
+  cursorMovement = new CursorMovement(mainWindow);
 
-  setInterval(() => {
-    mainWindow.setPosition(x, y);
-    x += 2; // Move right by 2 pixels each frame
+  // Create Tray
+  const iconPath = path.join(app.getAppPath(), "resources", "gemini-logo.png");
+  tray = new Tray(iconPath);
 
-    // Reset position if it goes too far right
-    if (x > 500) {
-      x = 100;
-    }
-  }, 16); // Update roughly every frame (60fps)
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Move Right",
+      type: "normal",
+      click: () => {
+        cursorMovement?.moveRight();
+      },
+    },
+    {
+      label: "Quit",
+      type: "normal",
+      click: () => {
+        cursorMovement?.cleanup();
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setToolTip("Gemini Cursor");
+  tray.setContextMenu(contextMenu);
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.whenReady().then(createWindow);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -64,6 +83,8 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+
+  cursorMovement?.cleanup();
 });
 
 app.on("activate", () => {

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu } from "electron";
+import { app, BrowserWindow, Tray, Menu, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { CursorController } from "./cursor-controller";
@@ -10,7 +10,29 @@ if (started) {
 
 let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
+let controlWindow: BrowserWindow | null = null;
 let cursorController: CursorController | null = null;
+
+const createControlWindow = () => {
+  controlWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+      devTools: true,
+    },
+  });
+
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    controlWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/control.html`);
+  } else {
+    controlWindow.loadFile(
+      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/control.html`)
+    );
+  }
+};
 
 const createWindow = () => {
   // Create the browser window.
@@ -24,8 +46,8 @@ const createWindow = () => {
     alwaysOnTop: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       devTools: false,
     },
   });
@@ -51,6 +73,13 @@ const createWindow = () => {
 
   const contextMenu = Menu.buildFromTemplate([
     {
+      label: "Show Controls",
+      type: "normal",
+      click: () => {
+        controlWindow?.show();
+      },
+    },
+    {
       label: "Move Right",
       type: "normal",
       click: () => {
@@ -74,17 +103,47 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Add IPC handler for move-right
+  ipcMain.on("move-right", () => {
+    console.log("move-right");
+    cursorController?.moveRight();
+  });
+
+  createWindow();
+  createControlWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
+  cursorController?.cleanup();
+
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
 
+// Add a before-quit handler to ensure proper cleanup
+app.on("before-quit", () => {
   cursorController?.cleanup();
+
+  // Destroy windows explicitly
+  if (mainWindow) {
+    mainWindow.destroy();
+    mainWindow = null;
+  }
+
+  if (controlWindow) {
+    controlWindow.destroy();
+    controlWindow = null;
+  }
+
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
 });
 
 app.on("activate", () => {

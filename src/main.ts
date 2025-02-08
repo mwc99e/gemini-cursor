@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Tray, Menu } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { CursorMovement } from "./cursor-movement";
+import { CursorController } from "./cursor-controller";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -10,7 +10,7 @@ if (started) {
 
 let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
-let cursorMovement: CursorMovement | null = null;
+let cursorController: CursorController | null = null;
 
 const createWindow = () => {
   // Create the browser window.
@@ -31,7 +31,7 @@ const createWindow = () => {
   });
 
   // Make the window click-through
-  mainWindow.setIgnoreMouseEvents(true);
+  mainWindow.setIgnoreMouseEvents(true, { forward: true });
 
   // Load the index.html
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -42,8 +42,8 @@ const createWindow = () => {
     );
   }
 
-  // Initialize cursor movement
-  cursorMovement = new CursorMovement(mainWindow);
+  // Initialize cursor controller
+  cursorController = new CursorController(mainWindow);
 
   // Create Tray
   const iconPath = path.join(app.getAppPath(), "resources", "gemini-logo.png");
@@ -54,14 +54,14 @@ const createWindow = () => {
       label: "Move Right",
       type: "normal",
       click: () => {
-        cursorMovement?.moveRight();
+        cursorController?.moveRight();
       },
     },
     {
       label: "Quit",
       type: "normal",
       click: () => {
-        cursorMovement?.cleanup();
+        cursorController?.cleanup();
         app.quit();
       },
     },
@@ -84,7 +84,7 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 
-  cursorMovement?.cleanup();
+  cursorController?.cleanup();
 });
 
 app.on("activate", () => {

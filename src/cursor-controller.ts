@@ -1,6 +1,6 @@
 import { BrowserWindow } from "electron";
 
-export class CursorMovement {
+export class CursorController {
   private cursorX = 100;
   private readonly cursorY = 100;
   private isAnimating = false;

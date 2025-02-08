@@ -54,11 +54,7 @@
 
 body {
   font-family: "Space Mono", monospace;
-  background: var(--Neutral-30);
-}
-
-.material-symbols-outlined.filled {
-  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+  background: var(--Neutral-5);
 }
 
 .space-mono-regular {

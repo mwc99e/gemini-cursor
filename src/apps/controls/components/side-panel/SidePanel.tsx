@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import React, { useEffect, useRef, useState } from "react";
 import cn from "classnames";
-import { useEffect, useRef, useState } from "react";
 import { RiSidebarFoldLine, RiSidebarUnfoldLine } from "react-icons/ri";
 import Select from "react-select";
 import { useLiveAPIContext } from "../../contexts/LiveAPIContext";
 import { useLoggerStore } from "../../lib/store-logger";
 import Logger, { LoggerFilterType } from "../logger/Logger";
 import "./side-panel.css";
+import { Send, SidebarClose, SidebarOpen } from "lucide-react";
 
 const filterOptions = [
   { value: "conversations", label: "Conversations" },
@@ -78,11 +79,11 @@ export default function SidePanel() {
         <h2>Console</h2>
         {open ? (
           <button className="opener" onClick={() => setOpen(false)}>
-            <RiSidebarFoldLine color="#b4b8bb" />
+            <SidebarClose color="#b4b8bb" size={20} />
           </button>
         ) : (
           <button className="opener" onClick={() => setOpen(true)}>
-            <RiSidebarUnfoldLine color="#b4b8bb" />
+            <SidebarOpen color="#b4b8bb" size={20} />
           </button>
         )}
       </header>
@@ -148,11 +149,8 @@ export default function SidePanel() {
             Type&nbsp;something...
           </span>
 
-          <button
-            className="send-button material-symbols-outlined filled"
-            onClick={handleSubmit}
-          >
-            send
+          <button className="send-button" onClick={handleSubmit}>
+            <Send size={20} />
           </button>
         </div>
       </div>

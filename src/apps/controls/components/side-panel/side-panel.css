@@ -5,10 +5,9 @@
   flex-direction: column;
   height: 100vh;
   transition: all 0.2s ease-in;
-  font-family: Arial, sans-serif;
+  font-family: "Google Sans", system-ui, -apple-system, sans-serif;
   border-right: 1px solid var(--gray-600);
   color: var(--Neutral-90, #e1e2e3);
-  font-family: var(--font-family);
   font-size: 13px;
   font-style: normal;
   font-weight: 400;
@@ -63,7 +62,7 @@
 .side-panel .top h2 {
   position: relative;
   color: var(--Neutral-90, #e1e2e3);
-  font-family: "Google Sans";
+  font-family: "Google Sans", system-ui, -apple-system, sans-serif;
   font-size: 21px;
   font-style: normal;
   font-weight: 500;
@@ -85,6 +84,18 @@
 .side-panel .opener {
   height: 30px;
   transition: transform 0.2s ease-in;
+  color: var(--Neutral-90, #e1e2e3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.side-panel .opener:hover {
+  color: var(--Neutral-60);
 }
 
 .side-panel:not(.open) .side-panel-container {
@@ -99,8 +110,22 @@
   opacity: 0;
 }
 
+.side-panel:not(.open) {
+  background: var(--Neutral-5);
+  border-right: none;
+}
+
+.side-panel:not(.open) .top {
+  padding: 12px 12px;
+  width: 100%;
+  justify-content: center;
+  border-bottom: none;
+}
+
 .side-panel:not(.open) .opener {
-  transform: translate(-50%, 0);
+  transform: translate(0, 0);
+  color: var(--Neutral-90, #e1e2e3);
+  margin: 0 auto;
 }
 
 .side-panel:not(.open) .input-container {
@@ -130,7 +155,7 @@
   gap: 6px;
   flex-shrink: 0;
   text-align: center;
-  font-family: "Space Mono";
+  font-family: "Space Mono", monospace;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -171,7 +196,7 @@
 .side-panel .input-container .input-content .send-button {
   position: absolute;
   top: 50%;
-  right: 0;
+  right: 12px;
   transform: translate(0, -50%);
   background: none;
   border: 0;
@@ -179,6 +204,11 @@
   cursor: pointer;
   transition: color 0.1s ease-in;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  font-size: 20px; /* Increased icon size */
 }
 
 .side-panel .input-container .input-content .send-button:hover {
@@ -203,6 +233,8 @@
   padding: 14px 18px;
   border: 0;
   resize: none;
+  font-family: "Google Sans", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
 }
 
 .side-panel .input-container .input-content .input-content-placeholder {

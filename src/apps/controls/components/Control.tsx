@@ -4,6 +4,7 @@ import { LiveAPIProvider } from "@/apps/controls/contexts/LiveAPIContext";
 import cn from "classnames";
 import ControlTray from "@/apps/controls/components/control-tray/ControlTray";
 import SidePanel from "@/apps/controls/components/side-panel/SidePanel";
+import { MoveRight } from "lucide-react";
 // import { Altair } from "@/apps/controls/components/altair/Altair";
 
 // Add TypeScript declaration for the window.electronAPI
@@ -73,6 +74,7 @@ const Control: React.FC = () => {
       <LiveAPIProvider url={uri} apiKey={API_KEY}>
         <h1>Gemini Controls</h1>
         <button className="control-button" onClick={handleMoveRight}>
+          <MoveRight size={24} />
           Move Right
         </button>
 

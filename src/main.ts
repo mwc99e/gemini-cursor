@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Tray, Menu, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { CursorController } from "./apps/cursor/controller";
+import { CursorController } from "@/apps/cursor/controller";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Control from "./components/Control";
+import Control from "@/apps/controls/components/Control";
 
 // Create root element and render
 ReactDOM.createRoot(document.getElementById("root")!).render(

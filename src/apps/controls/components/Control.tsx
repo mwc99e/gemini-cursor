@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/control.css";
+import "@/apps/controls/styles/control.css";
 
 // Add TypeScript declaration for the window.electronAPI
 declare global {

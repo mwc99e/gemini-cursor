@@ -97,6 +97,11 @@ const createCursorWindow = () => {
     resizable: false,
     hasShadow: false,
     alwaysOnTop: true,
+    useContentSize: true,
+    transparent: true,
+    fullscreenable: false,
+    skipTaskbar: true,
+    roundedCorners: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -105,8 +110,14 @@ const createCursorWindow = () => {
     },
   });
 
-  // Make the window click-through
+  // Make the window click-through and prevent it from accepting focus
   mainWindow.setIgnoreMouseEvents(true, { forward: true });
+  mainWindow.setFocusable(false);
+
+  // Ensure window size stays fixed
+  mainWindow.setMinimumSize(24, 24);
+  mainWindow.setMaximumSize(24, 24);
+  mainWindow.setAspectRatio(1);
 
   // Load the index.html
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

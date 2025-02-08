@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Tray, Menu, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { CursorController } from "./cursor-controller";
+import { CursorController } from "./apps/cursor/controller";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -26,10 +26,15 @@ const createControlWindow = () => {
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    controlWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/control.html`);
+    controlWindow.loadURL(
+      `${MAIN_WINDOW_VITE_DEV_SERVER_URL}/src/apps/controls/index.html`
+    );
   } else {
     controlWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/control.html`)
+      path.join(
+        __dirname,
+        `../renderer/${MAIN_WINDOW_VITE_NAME}/src/apps/controls/index.html`
+      )
     );
   }
 };
@@ -57,10 +62,15 @@ const createCursorWindow = () => {
 
   // Load the index.html
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/cursor.html`);
+    mainWindow.loadURL(
+      `${MAIN_WINDOW_VITE_DEV_SERVER_URL}/src/apps/cursor/index.html`
+    );
   } else {
     mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/cursor.html`)
+      path.join(
+        __dirname,
+        `../renderer/${MAIN_WINDOW_VITE_NAME}/src/apps/cursor/index.html`
+      )
     );
   }
 

@@ -2,55 +2,27 @@ import React, { useEffect } from "react";
 import { useLiveAPIContext } from "../contexts/LiveAPIContext";
 import { Tool, SchemaType } from "@google/generative-ai";
 
-// Types
-interface CursorMovement {
-  x: number;
-  y: number;
-  delay: number;
-}
-
-interface ResponseObject {
-  id: string;
-  name: string;
-  response: { result: object };
-}
-
 // Tools
 const toolObject: Tool[] = [
   {
     functionDeclarations: [
       {
-        name: "move_cursor",
+        name: "point_to",
         description:
-          "Moves the cursor through a sequence of coordinates on the screen with specified delays between movements. The coordinates should be normalised from 0-1000.",
+          "Points to a location on the screen. The coordinates should be normalised from 0-1000.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
-            movements: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  x: {
-                    type: SchemaType.NUMBER,
-                    description: "X coordinate to move cursor to",
-                  },
-                  y: {
-                    type: SchemaType.NUMBER,
-                    description: "Y coordinate to move cursor to",
-                  },
-                  delay: {
-                    type: SchemaType.NUMBER,
-                    description:
-                      "Delay in milliseconds before the next movement",
-                  },
-                },
-                required: ["x", "y", "delay"],
-              },
-              description: "Array of cursor movements with delays",
+            y: {
+              type: SchemaType.NUMBER,
+              description: "Y coordinate normalised from 0-1000",
+            },
+            x: {
+              type: SchemaType.NUMBER,
+              description: "X coordinate normalised from 0-1000",
             },
           },
-          required: ["movements"],
+          required: ["x", "y"],
         },
       },
     ],
@@ -62,6 +34,7 @@ const systemInstructionObject = {
     {
       text: `
 You are a helpful assistant that can move your own cursor to appropriate locations on the screen.
+Always call any relevant tools *before* speaking.
 
 Your cursor is different from the default cursor.
 
@@ -74,11 +47,7 @@ Do not respond with phrases like "is there anything else I can do for you?" or "
 
 Remember that you will not be asked to move your cursor. You should reason when it is appropriate to move your cursor.
 
-Since you will respond with multiple movements and delays, assign appropriate delays so that it will
-synchronise with your speech. Small delays should rarely be used.
-
-The time it takes for you to speak 5 words is approximately 3 seconds.
-Calculate the delays based on this.
+Always call any relevant tools *before* speaking.
 `,
     },
   ],
@@ -91,6 +60,7 @@ const CursorControl: React.FC = () => {
     setConfig({
       model: "models/gemini-2.0-flash-exp",
       generationConfig: {
+        temperature: 0.5,
         responseModalities: "audio",
         speechConfig: {
           voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
@@ -104,43 +74,16 @@ const CursorControl: React.FC = () => {
   useEffect(() => {
     const handleToolCall = async (toolCall: any) => {
       const functionCalls = toolCall.functionCalls;
-      const functionResponses: ResponseObject[] = [];
 
       if (functionCalls.length > 0) {
         for (const fCall of functionCalls) {
-          if (fCall.name === "move_cursor") {
-            const { movements } = fCall.args;
-            console.log("movements", movements);
+          if (fCall.name === "point_to") {
+            const { x, y } = fCall.args;
+            console.log("pointing to", { x, y });
 
-            // Calculate cumulative delays for sequential movements
-            let cumulativeDelay = 0;
-            for (const movement of movements) {
-              await new Promise((resolve) => {
-                setTimeout(() => {
-                  window.electronAPI.moveCursor(movement.x, movement.y);
-                  resolve(null);
-                }, cumulativeDelay);
-              });
-              cumulativeDelay += movement.delay;
-            }
+            window.electronAPI.moveCursor(x, y);
           }
-
-          const functionResponse = {
-            id: fCall.id,
-            name: fCall.name,
-            response: {
-              result: { string_value: "Cursor movements completed." },
-            },
-          };
-
-          functionResponses.push(functionResponse);
         }
-
-        // Send tool responses back to the model
-        const toolResponse = {
-          functionResponses: functionResponses,
-        };
-        // client.sendToolResponse(toolResponse);
       }
     };
 

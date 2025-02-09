@@ -5,23 +5,15 @@ import {
   Menu,
   ipcMain,
   session,
-  dialog,
   desktopCapturer,
 } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { CursorController } from "@/apps/cursor/controller";
-import fs from "node:fs";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
-}
-
-// Ensure captures directory exists
-const capturesDir = path.join(app.getPath("userData"), "captures");
-if (!fs.existsSync(capturesDir)) {
-  fs.mkdirSync(capturesDir, { recursive: true });
 }
 
 let tray: Tray | null = null;
@@ -199,7 +191,7 @@ app.whenReady().then(() => {
     async (request, callback) => {
       try {
         const sources = await desktopCapturer.getSources({
-          types: ["screen", "window"],
+          types: ["screen"],
           thumbnailSize: { width: 0, height: 0 },
         });
 
@@ -221,35 +213,6 @@ app.whenReady().then(() => {
   ipcMain.on("move-cursor", (event, x: number, y: number) => {
     cursorController?.moveTo(x, y);
   });
-
-  ipcMain.on(
-    "save-image",
-    async (event, imageData: string, autoSave?: boolean) => {
-      try {
-        let filePath: string;
-
-        if (autoSave) {
-          // For automatic saves, use the captures directory directly
-          filePath = path.join(capturesDir, `capture-${Date.now()}.jpg`);
-        } else {
-          // For manual saves, show dialog but default to captures directory
-          const { filePath: selectedPath } = await dialog.showSaveDialog({
-            defaultPath: path.join(capturesDir, `capture-${Date.now()}.jpg`),
-            filters: [{ name: "Images", extensions: ["jpg"] }],
-          });
-          filePath = selectedPath;
-        }
-
-        if (filePath) {
-          // Remove the data URL prefix and convert to buffer
-          const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, "");
-          fs.writeFileSync(filePath, base64Data, "base64");
-        }
-      } catch (error) {
-        console.error("Error saving image:", error);
-      }
-    }
-  );
 
   createCursorWindow();
   createControlWindow();

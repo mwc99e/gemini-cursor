@@ -53,8 +53,15 @@
 }
 
 body {
+  margin: 0;
+  padding: 0;
   font-family: "Space Mono", monospace;
   background: var(--Neutral-5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
 }
 
 .space-mono-regular {

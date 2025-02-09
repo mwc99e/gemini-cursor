@@ -4,14 +4,12 @@ import { LiveAPIProvider } from "@/apps/controls/contexts/LiveAPIContext";
 import cn from "classnames";
 import ControlTray from "@/apps/controls/components/control-tray/ControlTray";
 import SidePanel from "@/apps/controls/components/side-panel/SidePanel";
-import { MoveRight } from "lucide-react";
 import CursorControl from "@/apps/controls/components/CursorControl";
 
 // Add TypeScript declaration for the window.electronAPI
 declare global {
   interface Window {
     electronAPI: {
-      moveRight: () => void;
       moveCursor: (x: number, y: number) => void;
     };
   }
@@ -31,10 +29,6 @@ const Control: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   // either the screen capture, the video or null, if null we hide it
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-
-  const handleMoveRight = () => {
-    window.electronAPI.moveRight();
-  };
 
   return (
     <div className="App">
@@ -64,35 +58,6 @@ const Control: React.FC = () => {
             </ControlTray>
           </main>
         </div>
-      </LiveAPIProvider>
-    </div>
-  );
-
-  return (
-    <div className="container">
-      <LiveAPIProvider url={uri} apiKey={API_KEY}>
-        <h1>Gemini Controls</h1>
-        <button className="control-button" onClick={handleMoveRight}>
-          <MoveRight size={24} />
-          Move Right
-        </button>
-
-        <video
-          className={cn("stream", {
-            hidden: !videoRef.current || !videoStream,
-          })}
-          ref={videoRef}
-          autoPlay
-          playsInline
-        />
-
-        <ControlTray
-          videoRef={videoRef}
-          supportsVideo={true}
-          onVideoStreamChange={setVideoStream}
-        >
-          {/* put your own buttons here */}
-        </ControlTray>
       </LiveAPIProvider>
     </div>
   );

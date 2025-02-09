@@ -53,14 +53,6 @@ export class CursorController {
     }, 1000 / fps);
   }
 
-  public moveRight() {
-    if (!this.isAnimating) {
-      const targetX = this.cursorX + 100;
-      const finalX = targetX > 500 ? 100 : targetX;
-      this.smoothlyMoveCursor(finalX, this.cursorY);
-    }
-  }
-
   public moveTo(normalizedX: number, normalizedY: number) {
     if (this.isAnimating || !this.mainWindow) return;
 

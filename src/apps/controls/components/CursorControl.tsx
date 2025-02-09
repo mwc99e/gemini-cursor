@@ -8,19 +8,34 @@ const toolObject: Tool[] = [
   {
     functionDeclarations: [
       {
-        name: "point_to",
+        name: "move_cursor_sequence",
         description:
-          "Points to a location on the screen based on a natural language description of what to point to.",
+          "Moves the cursor through a sequence of points on the screen with specified delays between movements.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
-            description: {
-              type: SchemaType.STRING,
-              description:
-                "Detailed description of what to point to on the screen, like 'the login button in the top right' or 'the settings icon that looks like a gear'",
+            points: {
+              type: SchemaType.ARRAY,
+              description: "List of points to move to with their delays",
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  description: {
+                    type: SchemaType.STRING,
+                    description:
+                      "Detailed description of what to point to on the screen, like 'the login button in the top right' or 'the settings icon that looks like a gear'",
+                  },
+                  delay: {
+                    type: SchemaType.NUMBER,
+                    description:
+                      "Time to wait in seconds AFTER the previous point before moving to this point. For the first point, use 0 to move immediately.",
+                  },
+                },
+                required: ["description", "delay"],
+              },
             },
           },
-          required: ["description"],
+          required: ["points"],
         },
       },
     ],
@@ -31,21 +46,40 @@ const systemInstructionObject = {
   parts: [
     {
       text: `
-You are a helpful assistant that can move your own cursor to appropriate locations on the screen.
+You are a helpful assistant that can move your cursor to different locations on the screen in a choreographed sequence.
 
-Your cursor is different from the default cursor.
+Your cursor is visually distinct from the default system cursor.
 
-You will respond in speech naturally but you will also move your cursor in a natural manner.
-When moving the cursor, you should also describe what you're pointing to.
+You will respond in speech naturally while moving your cursor in an intuitive sequence through relevant points on the screen.
+When moving through points, you should describe what you're pointing to in a natural conversational way.
 
-Once you've moved the cursor, do not respond with phrases like "I've moved the cursor to the location".
-Just continue with the conversation naturally.
+Timing Guidelines:
+- Calculate delays based on the natural speech between points
+- Use approximately 1 second for every 3 words you plan to speak
+- Minimum delay between points should be 2 seconds
+- Maximum delay between points should be 8 seconds
+- First point should always have 0 delay (immediate)
 
-Do not respond with phrases like "is there anything else I can do for you?" or "let me know if there's anything else you need".
+Example speech:
+"Let me show you the main features. Here in the top-left is the menu button, and if we move over here you'll see the settings panel, and finally this is where your profile information appears."
 
-Remember that you will not be asked to move your cursor. You should reason when it is appropriate to move your cursor.
+Timing breakdown for the example:
+1. "Here in the top-left is the menu button" (8 words ≈ 3s)
+2. "and if we move over here you'll see the settings panel" (12 words ≈ 4s)
+3. "and finally this is where your profile information appears" (10 words ≈ 3s)
 
-Always speak even when calling a tool.
+This would translate to delays of [0, 3, 4, 3] seconds between points.
+
+Do not use mechanical phrases like:
+- "I've moved the cursor to X"
+- "Now I'm pointing at Y"
+- "The cursor is now at Z"
+- "Is there anything else I can help you with?"
+- "Let me know if you need anything else"
+
+Remember that you should proactively move your cursor when it helps explain or demonstrate something, without being explicitly asked to do so.
+
+Always maintain natural conversation even when executing cursor movements. Keep the timing natural and match it to your speech rhythm.
 `,
     },
   ],
@@ -57,7 +91,7 @@ type CursorControlProps = {
 
 async function getPointsFromImage(
   base64Image: string,
-  targetDescription: string
+  points: { description: string; delay: number }[]
 ) {
   // @ts-expect-error import.meta.env is injected by Vite
   const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
@@ -66,26 +100,32 @@ async function getPointsFromImage(
     model: "models/gemini-2.0-flash-exp",
   });
 
-  const prompt = `Find the location of: "${targetDescription}". The answer should follow the json format: {"point": <point>, "label": <label1>}. The point should be in [y, x] format normalized to 0-1000. Return only one point that best matches the description. Do not wrap the JSON in markdown quotes. Just return the JSON string.`;
+  const results = await Promise.all(
+    points.map(async ({ description }) => {
+      const prompt = `Find the location of: "${description}". The answer should follow the json format: {"point": <point>, "label": <label1>}. The point should be in [y, x] format normalized to 0-1000. Return only one point that best matches the description. Do not wrap the JSON in markdown quotes. Just return the JSON string.`;
 
-  // Remove the data URL prefix if it exists
-  const imageData = base64Image.includes("data:image")
-    ? base64Image.slice(base64Image.indexOf(",") + 1)
-    : base64Image;
+      // Remove the data URL prefix if it exists
+      const imageData = base64Image.includes("data:image")
+        ? base64Image.slice(base64Image.indexOf(",") + 1)
+        : base64Image;
 
-  const result = await model.generateContent([
-    {
-      inlineData: {
-        data: imageData,
-        mimeType: "image/jpeg",
-      },
-    },
-    prompt,
-  ]);
+      const result = await model.generateContent([
+        {
+          inlineData: {
+            data: imageData,
+            mimeType: "image/jpeg",
+          },
+        },
+        prompt,
+      ]);
 
-  const text = result.response.text();
-  console.log("text", text);
-  return JSON.parse(text);
+      const text = result.response.text();
+      console.log("text", text);
+      return JSON.parse(text);
+    })
+  );
+
+  return results;
 }
 
 const CursorControl: React.FC<CursorControlProps> = ({ lastCapturedFrame }) => {
@@ -109,33 +149,35 @@ const CursorControl: React.FC<CursorControlProps> = ({ lastCapturedFrame }) => {
   useEffect(() => {
     const handleToolCall = async (toolCall: any) => {
       const functionCalls = toolCall.functionCalls;
+      console.log("functionCalls", functionCalls);
 
-      if (functionCalls.length > 0) {
-        for (const fCall of functionCalls) {
-          if (fCall.name === "point_to") {
-            const { description } = fCall.args;
-            console.log("pointing to:", description);
+      if (
+        functionCalls.length > 0 &&
+        functionCalls[0].name === "move_cursor_sequence"
+      ) {
+        const { points } = functionCalls[0].args;
 
-            if (lastCapturedFrame) {
-              const points = await getPointsFromImage(
-                lastCapturedFrame,
-                description
-              );
-              console.log("points", points);
-              console.log("is array", Array.isArray(points));
-              console.log("type of points", typeof points);
-              let point = null;
-              if (Array.isArray(points)) {
-                point = points[0];
-              } else {
-                point = points.point;
-              }
+        if (points.length > 0 && lastCapturedFrame) {
+          const locations = await getPointsFromImage(lastCapturedFrame, points);
+          console.log("locations", locations);
 
-              // Use the first point from the response
-              if (point) {
-                const [y, x] = point;
+          // Calculate cumulative delays (convert from seconds to milliseconds)
+          let cumulativeDelay = 0;
+          for (let i = 0; i < locations.length; i++) {
+            const point = Array.isArray(locations[i])
+              ? locations[i][0]
+              : locations[i].point;
+            console.log("point", point);
+
+            // Current point's delay is added to cumulative
+            cumulativeDelay += points[i].delay * 1000; // Convert to milliseconds
+
+            if (point) {
+              const [y, x] = point;
+              // Schedule the cursor movement at the cumulative delay
+              setTimeout(() => {
                 window.electronAPI.moveCursor(x, y);
-              }
+              }, cumulativeDelay);
             }
           }
         }

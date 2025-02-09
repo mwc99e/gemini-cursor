@@ -5,4 +5,6 @@ import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   moveCursor: (x: number, y: number) => ipcRenderer.send("move-cursor", x, y),
+  saveImage: (imageData: string, autoSave?: boolean) =>
+    ipcRenderer.send("save-image", imageData, autoSave),
 });

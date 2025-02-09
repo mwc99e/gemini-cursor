@@ -61,9 +61,19 @@ export class CursorController {
     const { width: screenWidth, height: screenHeight } =
       primaryDisplay.workArea;
 
+    console.log({
+      screenWidth,
+      screenHeight,
+      primaryDisplay,
+    });
+
     // Scale coordinates from 0-1000 to actual screen dimensions
-    const targetX = Math.round((normalizedX / 1000) * screenWidth);
-    const targetY = Math.round((normalizedY / 1000) * screenHeight);
+    let targetX = Math.floor((normalizedX / 1000) * 1746);
+    let targetY = Math.floor((normalizedY / 1000) * 982);
+
+    // Scale it to screen dimensions
+    targetX = Math.floor((targetX / 1746) * screenWidth);
+    targetY = Math.floor((targetY / 982) * screenHeight);
 
     // Trigger smooth movement to the target position
     this.smoothlyMoveCursor(targetX, targetY);

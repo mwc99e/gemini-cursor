@@ -138,11 +138,26 @@ function ControlTray({
       }
 
       const ctx = canvas.getContext("2d")!;
-      canvas.width = video.videoWidth * 0.25;
-      canvas.height = video.videoHeight * 0.25;
+      // canvas.width = video.videoWidth * 0.25;
+      // canvas.height = video.videoHeight * 0.25;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      console.log({
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+        canvasWidth: canvas.width,
+        canvasHeight: canvas.height,
+      });
+
       if (canvas.width + canvas.height > 0) {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         const base64 = canvas.toDataURL("image/jpeg", 1.0);
+
+        // Save the image automatically before sending
+        window.electronAPI.saveImage(base64, true);
+
+        // Send to realtimeInput
         const data = base64.slice(base64.indexOf(",") + 1, Infinity);
         client.sendRealtimeInput([{ mimeType: "image/jpeg", data }]);
       }

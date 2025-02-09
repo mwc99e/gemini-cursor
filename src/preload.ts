@@ -5,4 +5,5 @@ import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   moveRight: () => ipcRenderer.send("move-right"),
+  moveCursor: (x: number, y: number) => ipcRenderer.send("move-cursor", x, y),
 });

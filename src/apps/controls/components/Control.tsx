@@ -5,13 +5,14 @@ import cn from "classnames";
 import ControlTray from "@/apps/controls/components/control-tray/ControlTray";
 import SidePanel from "@/apps/controls/components/side-panel/SidePanel";
 import { MoveRight } from "lucide-react";
-// import { Altair } from "@/apps/controls/components/altair/Altair";
+import CursorControl from "@/apps/controls/components/CursorControl";
 
 // Add TypeScript declaration for the window.electronAPI
 declare global {
   interface Window {
     electronAPI: {
       moveRight: () => void;
+      moveCursor: (x: number, y: number) => void;
     };
   }
 }
@@ -31,8 +32,6 @@ const Control: React.FC = () => {
   // either the screen capture, the video or null, if null we hide it
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
 
-  console.log("videoStream", videoStream);
-
   const handleMoveRight = () => {
     window.electronAPI.moveRight();
   };
@@ -44,8 +43,8 @@ const Control: React.FC = () => {
           <SidePanel />
           <main>
             <div className="main-app-area">
-              {/* APP goes here */}
-              {/* <Altair /> */}
+              <CursorControl />
+
               <video
                 className={cn("stream", {
                   hidden: !videoRef.current || !videoStream,

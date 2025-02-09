@@ -142,13 +142,6 @@ const createCursorWindow = () => {
       },
     },
     {
-      label: "Move Right",
-      type: "normal",
-      click: () => {
-        cursorController?.moveRight();
-      },
-    },
-    {
       label: "Quit",
       type: "normal",
       click: () => {
@@ -187,6 +180,10 @@ app.whenReady().then(() => {
 
   ipcMain.on("move-right", () => {
     cursorController?.moveRight();
+  });
+
+  ipcMain.on("move-cursor", (event, x: number, y: number) => {
+    cursorController?.moveTo(x, y);
   });
 
   createCursorWindow();

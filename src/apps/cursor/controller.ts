@@ -1,8 +1,8 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, screen } from "electron";
 
 export class CursorController {
   private cursorX = 100;
-  private readonly cursorY = 100;
+  private cursorY = 100;
   private isAnimating = false;
   private animationInterval: NodeJS.Timeout | null = null;
   private mainWindow: BrowserWindow | null = null;
@@ -16,12 +16,14 @@ export class CursorController {
     this.mainWindow?.setPosition(this.cursorX, this.cursorY);
   }
 
-  public smoothlyMoveCursor(targetX: number) {
+  public smoothlyMoveCursor(targetX: number, targetY: number) {
     if (this.isAnimating || !this.mainWindow) return;
 
     this.isAnimating = true;
     const startX = this.cursorX;
-    const distance = targetX - startX;
+    const startY = this.cursorY;
+    const distanceX = targetX - startX;
+    const distanceY = targetY - startY;
     const duration = 500; // Animation duration in ms
     const fps = 60;
     const frames = duration / (1000 / fps);
@@ -33,9 +35,13 @@ export class CursorController {
       // Use easeOutQuad for smooth movement
       const progress = frame / frames;
       const easeProgress = 1 - (1 - progress) * (1 - progress);
-      this.cursorX = startX + distance * easeProgress;
+      this.cursorX = startX + distanceX * easeProgress;
+      this.cursorY = startY + distanceY * easeProgress;
 
-      this.mainWindow?.setPosition(Math.round(this.cursorX), this.cursorY);
+      this.mainWindow?.setPosition(
+        Math.round(this.cursorX),
+        Math.round(this.cursorY)
+      );
 
       if (frame >= frames) {
         this.isAnimating = false;
@@ -51,8 +57,24 @@ export class CursorController {
     if (!this.isAnimating) {
       const targetX = this.cursorX + 100;
       const finalX = targetX > 500 ? 100 : targetX;
-      this.smoothlyMoveCursor(finalX);
+      this.smoothlyMoveCursor(finalX, this.cursorY);
     }
+  }
+
+  public moveTo(normalizedX: number, normalizedY: number) {
+    if (this.isAnimating || !this.mainWindow) return;
+
+    // Get the primary display's dimensions
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenWidth, height: screenHeight } =
+      primaryDisplay.workArea;
+
+    // Scale coordinates from 0-1000 to actual screen dimensions
+    const targetX = Math.round((normalizedX / 1000) * screenWidth);
+    const targetY = Math.round((normalizedY / 1000) * screenHeight);
+
+    // Trigger smooth movement to the target position
+    this.smoothlyMoveCursor(targetX, targetY);
   }
 
   public cleanup() {

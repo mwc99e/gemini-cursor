@@ -15,6 +15,7 @@ declare global {
   }
 }
 
+// @ts-expect-error import.meta.env is injected by Vite
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 if (typeof API_KEY !== "string") {
   throw new Error("set VITE_GEMINI_API_KEY in .env");

@@ -46,6 +46,7 @@ export type ControlTrayProps = {
   children?: ReactNode;
   supportsVideo: boolean;
   onVideoStreamChange?: (stream: MediaStream | null) => void;
+  onFrameCapture?: (base64Image: string) => void;
 };
 
 type MediaStreamButtonProps = {
@@ -76,6 +77,7 @@ function ControlTray({
   videoRef,
   children,
   onVideoStreamChange = () => undefined,
+  onFrameCapture = () => undefined,
   supportsVideo,
 }: ControlTrayProps) {
   const videoStreams = [useWebcam(), useScreenCapture()];
@@ -148,6 +150,9 @@ function ControlTray({
         // Send to realtimeInput
         const data = base64.slice(base64.indexOf(",") + 1, Infinity);
         client.sendRealtimeInput([{ mimeType: "image/jpeg", data }]);
+
+        // Share the full base64 string including the prefix
+        onFrameCapture(base64);
       }
       if (connected) {
         timeoutId = window.setTimeout(sendVideoFrame, 1000 / 0.5);
@@ -159,7 +164,7 @@ function ControlTray({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [connected, activeVideoStream, client, videoRef]);
+  }, [connected, activeVideoStream, client, videoRef, onFrameCapture]);
 
   //handler for swapping from one video-stream to the next
   const changeStreams = (next?: UseMediaStreamResult) => async () => {

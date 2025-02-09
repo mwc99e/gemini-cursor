@@ -30,6 +30,9 @@ const App = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   // either the screen capture, the video or null, if null we hide it
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [lastCapturedFrame, setLastCapturedFrame] = useState<string | null>(
+    null
+  );
 
   return (
     <div className="App">
@@ -38,7 +41,7 @@ const App = () => {
           <SidePanel />
           <main>
             <div className="main-app-area">
-              <CursorControl />
+              <CursorControl lastCapturedFrame={lastCapturedFrame} />
 
               <video
                 className={cn("stream", {
@@ -54,6 +57,7 @@ const App = () => {
               videoRef={videoRef}
               supportsVideo={true}
               onVideoStreamChange={setVideoStream}
+              onFrameCapture={setLastCapturedFrame}
             >
               {/* put your own buttons here */}
             </ControlTray>

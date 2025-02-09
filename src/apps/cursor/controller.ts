@@ -58,8 +58,8 @@ export class CursorController {
 
     // Get the primary display's dimensions
     const primaryDisplay = screen.getPrimaryDisplay();
-    const { width: screenWidth, height: screenHeight } =
-      primaryDisplay.workArea;
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
+    // primaryDisplay.workArea;
 
     console.log({
       screenWidth,
@@ -68,12 +68,8 @@ export class CursorController {
     });
 
     // Scale coordinates from 0-1000 to actual screen dimensions
-    let targetX = Math.floor((normalizedX / 1000) * 1746);
-    let targetY = Math.floor((normalizedY / 1000) * 982);
-
-    // Scale it to screen dimensions
-    targetX = Math.floor((targetX / 1746) * screenWidth);
-    targetY = Math.floor((targetY / 982) * screenHeight);
+    const targetX = (normalizedX / 1000) * screenWidth;
+    const targetY = (normalizedY / 1000) * screenHeight;
 
     // Trigger smooth movement to the target position
     this.smoothlyMoveCursor(targetX, targetY);

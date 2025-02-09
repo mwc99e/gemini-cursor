@@ -6,6 +6,7 @@ import {
   ipcMain,
   session,
   dialog,
+  desktopCapturer,
 } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
@@ -190,6 +191,30 @@ app.whenReady().then(() => {
           permission as (typeof allowedPermissions)[number]
         )
       );
+    }
+  );
+
+  // Set up display media request handler
+  session.defaultSession.setDisplayMediaRequestHandler(
+    async (request, callback) => {
+      try {
+        const sources = await desktopCapturer.getSources({
+          types: ["screen", "window"],
+          thumbnailSize: { width: 0, height: 0 },
+        });
+
+        if (sources.length > 0) {
+          callback({
+            video: sources[0],
+            audio: null,
+          });
+        } else {
+          callback(null);
+        }
+      } catch (error) {
+        console.error("Error getting screen sources:", error);
+        callback(null);
+      }
     }
   );
 

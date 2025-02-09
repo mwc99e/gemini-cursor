@@ -42,40 +42,20 @@ export function useScreenCapture(): UseMediaStreamResult {
 
   const start = async () => {
     try {
-      const constraints = {
-        audio: false,
+      const mediaStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
-          mandatory: {
-            chromeMediaSource: "desktop",
-            minWidth: 1280,
-            maxWidth: 1920,
-            minHeight: 720,
-            maxHeight: 1080,
-          },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 30 },
         },
-      };
-
-      const mediaStream = await navigator.mediaDevices.getUserMedia(
-        constraints as MediaStreamConstraints
-      );
+        audio: false,
+      });
       setStream(mediaStream);
       setIsStreaming(true);
       return mediaStream;
     } catch (error) {
       console.error("Error starting screen capture:", error);
-      // Try fallback method
-      try {
-        const mediaStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: false,
-        });
-        setStream(mediaStream);
-        setIsStreaming(true);
-        return mediaStream;
-      } catch (fallbackError) {
-        console.error("Screen capture fallback also failed:", fallbackError);
-        throw fallbackError;
-      }
+      throw error;
     }
   };
 

@@ -9,7 +9,7 @@ if (started) {
 }
 
 let tray: Tray | null = null;
-let mainWindow: BrowserWindow | null = null;
+let cursorWindow: BrowserWindow | null = null;
 let controlWindow: BrowserWindow | null = null;
 let cursorController: CursorController | null = null;
 
@@ -88,20 +88,18 @@ const createControlWindow = () => {
 };
 
 const createCursorWindow = () => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 24, // Small window for the cursor
+  cursorWindow = new BrowserWindow({
+    width: 24,
     height: 24,
     frame: false,
     backgroundColor: "#D96570",
     resizable: false,
     hasShadow: false,
     alwaysOnTop: true,
-    useContentSize: true,
     transparent: true,
     fullscreenable: false,
     skipTaskbar: true,
-    roundedCorners: true,
+    roundedCorners: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -111,21 +109,16 @@ const createCursorWindow = () => {
   });
 
   // Make the window click-through and prevent it from accepting focus
-  mainWindow.setIgnoreMouseEvents(true, { forward: true });
-  mainWindow.setFocusable(false);
-
-  // Ensure window size stays fixed
-  mainWindow.setMinimumSize(24, 24);
-  mainWindow.setMaximumSize(24, 24);
-  mainWindow.setAspectRatio(1);
+  cursorWindow.setIgnoreMouseEvents(true, { forward: true });
+  cursorWindow.setFocusable(false);
 
   // Load the index.html
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(
+    cursorWindow.loadURL(
       `${MAIN_WINDOW_VITE_DEV_SERVER_URL}/src/apps/cursor/index.html`
     );
   } else {
-    mainWindow.loadFile(
+    cursorWindow.loadFile(
       path.join(
         __dirname,
         `../renderer/${MAIN_WINDOW_VITE_NAME}/src/apps/cursor/index.html`
@@ -134,7 +127,7 @@ const createCursorWindow = () => {
   }
 
   // Initialize cursor controller
-  cursorController = new CursorController(mainWindow);
+  cursorController = new CursorController(cursorWindow);
 
   // Create Tray
   const iconPath = path.join(app.getAppPath(), "resources", "gemini-logo.png");
@@ -216,9 +209,9 @@ app.on("before-quit", () => {
   cursorController?.cleanup();
 
   // Destroy windows explicitly
-  if (mainWindow) {
-    mainWindow.destroy();
-    mainWindow = null;
+  if (cursorWindow) {
+    cursorWindow.destroy();
+    cursorWindow = null;
   }
 
   if (controlWindow) {

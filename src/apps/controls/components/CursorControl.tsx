@@ -9,20 +9,30 @@ const toolObject: Tool[] = [
       {
         name: "point_to",
         description:
-          "Points to a location on the screen. The coordinates should be normalised from 0-1000.",
+          "Points to a location on the screen using a bounding box. The coordinates should be normalised from 0-1000.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
-            y: {
+            ymin: {
               type: SchemaType.NUMBER,
-              description: "Y coordinate normalised from 0-1000",
+              description: "Minimum Y coordinate (top) normalised from 0-1000",
             },
-            x: {
+            xmin: {
               type: SchemaType.NUMBER,
-              description: "X coordinate normalised from 0-1000",
+              description: "Minimum X coordinate (left) normalised from 0-1000",
+            },
+            ymax: {
+              type: SchemaType.NUMBER,
+              description:
+                "Maximum Y coordinate (bottom) normalised from 0-1000",
+            },
+            xmax: {
+              type: SchemaType.NUMBER,
+              description:
+                "Maximum X coordinate (right) normalised from 0-1000",
             },
           },
-          required: ["x", "y"],
+          required: ["ymin", "xmin", "ymax", "xmax"],
         },
       },
     ],
@@ -78,9 +88,10 @@ const CursorControl: React.FC = () => {
       if (functionCalls.length > 0) {
         for (const fCall of functionCalls) {
           if (fCall.name === "point_to") {
-            const { x, y } = fCall.args;
+            const { xmin, ymin } = fCall.args;
+            console.log("bbox coordinates:", fCall.args);
 
-            window.electronAPI.moveCursor(x, y);
+            window.electronAPI.moveCursor(xmin, ymin);
           }
         }
       }

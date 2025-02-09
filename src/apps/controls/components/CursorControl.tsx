@@ -79,7 +79,6 @@ const CursorControl: React.FC = () => {
         for (const fCall of functionCalls) {
           if (fCall.name === "point_to") {
             const { x, y } = fCall.args;
-            console.log("pointing to", { x, y });
 
             window.electronAPI.moveCursor(x, y);
           }

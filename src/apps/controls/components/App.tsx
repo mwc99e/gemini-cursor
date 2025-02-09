@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import "@/apps/controls/styles/control.css";
+import "@/apps/controls/index.css";
 import { LiveAPIProvider } from "@/apps/controls/contexts/LiveAPIContext";
 import cn from "classnames";
 import ControlTray from "@/apps/controls/components/control-tray/ControlTray";
@@ -24,7 +24,7 @@ if (typeof API_KEY !== "string") {
 const host = "generativelanguage.googleapis.com";
 const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
 
-const Control: React.FC = () => {
+const App = () => {
   // this video reference is used for displaying the active stream, whether that is the webcam or screen capture
   // feel free to style as you see fit
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -64,4 +64,4 @@ const Control: React.FC = () => {
   );
 };
 
-export default Control;
+export default App;

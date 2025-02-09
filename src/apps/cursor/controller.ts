@@ -59,13 +59,6 @@ export class CursorController {
     // Get the primary display's dimensions
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
-    // primaryDisplay.workArea;
-
-    console.log({
-      screenWidth,
-      screenHeight,
-      primaryDisplay,
-    });
 
     // Scale coordinates from 0-1000 to actual screen dimensions
     const targetX = (normalizedX / 1000) * screenWidth;

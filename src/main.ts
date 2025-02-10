@@ -74,7 +74,7 @@ const createControlWindow = () => {
         responseHeaders: {
           ...details.responseHeaders,
           "Content-Security-Policy": [
-            "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: mediastream: blob:; connect-src 'self' wss://generativelanguage.googleapis.com ws://generativelanguage.googleapis.com https://generativelanguage.googleapis.com; media-src 'self' mediastream: blob: data:; img-src 'self' data: blob:",
+            "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' wss://generativelanguage.googleapis.com ws://generativelanguage.googleapis.com https://generativelanguage.googleapis.com; media-src 'self' mediastream: blob: data:; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:;",
           ],
         },
       });

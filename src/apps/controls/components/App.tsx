@@ -68,7 +68,7 @@ const App = () => {
                     target="_system"
                     rel="noopener noreferrer"
                   >
-                    @27upon2
+                    @13point5
                   </a>
                 </p>
               </div>

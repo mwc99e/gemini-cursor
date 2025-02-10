@@ -123,8 +123,9 @@ const createCursorWindow = () => {
 
   // Initialize cursor controller
   cursorController = new CursorController(cursorWindow);
+};
 
-  // Create Tray
+const createTray = () => {
   let iconPath: string;
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     iconPath = path.join(process.cwd(), "resources", "white-logo.png");
@@ -195,6 +196,7 @@ app.whenReady().then(() => {
     cursorController?.moveTo(x, y);
   });
 
+  createTray();
   createCursorWindow();
   createControlWindow();
 });

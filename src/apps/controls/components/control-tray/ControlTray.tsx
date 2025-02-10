@@ -230,7 +230,6 @@ function ControlTray({
             {connected ? <Pause size={16} /> : <Play size={16} />}
           </button>
         </div>
-        <span className="text-indicator">Streaming</span>
       </div>
     </section>
   );

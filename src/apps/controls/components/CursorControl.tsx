@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useLiveAPIContext } from "../contexts/LiveAPIContext";
-import { Tool, SchemaType } from "@google/generative-ai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Tool, SchemaType, GoogleGenerativeAI } from "@google/generative-ai";
 
 // Tools
 const toolObject: Tool[] = [

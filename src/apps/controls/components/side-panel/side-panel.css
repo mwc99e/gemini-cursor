@@ -196,6 +196,20 @@
   overflow: hidden;
 }
 
+.side-panel .input-container.disabled {
+  opacity: 0.5;
+}
+
+.side-panel .input-container.disabled .input-content {
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.side-panel .input-container.disabled .input-area,
+.side-panel .input-container.disabled .send-button {
+  pointer-events: none;
+}
+
 .side-panel .input-container .input-content {
   position: relative;
   background: var(--Neutral-10);
@@ -203,28 +217,12 @@
   height: 22px;
   border-radius: 10px;
   padding: 11px 18px;
+  transition: all 0.2s ease-in;
 }
 
-.side-panel .input-container .input-content .send-button {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translate(0, -50%);
-  background: none;
-  border: 0;
-  color: var(--Neutral-20);
-  cursor: pointer;
-  transition: color 0.1s ease-in;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  font-size: 20px; /* Increased icon size */
-}
-
-.side-panel .input-container .input-content .send-button:hover {
-  color: var(--Neutral-60);
+.side-panel .input-container:not(.disabled) .input-content {
+  background: var(--Neutral-15);
+  border-color: var(--Neutral-20);
 }
 
 .side-panel .input-container .input-content .input-area {
@@ -247,6 +245,37 @@
   resize: none;
   font-family: "Google Sans", system-ui, -apple-system, sans-serif;
   font-size: 13px;
+  transition: color 0.2s ease-in;
+}
+
+.side-panel .input-container.disabled .input-area {
+  color: var(--Neutral-60);
+}
+
+.side-panel .input-container .input-content .send-button {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translate(0, -50%);
+  background: none;
+  border: 0;
+  color: var(--Neutral-20);
+  cursor: pointer;
+  transition: all 0.2s ease-in;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  font-size: 20px;
+}
+
+.side-panel .input-container:not(.disabled) .input-content .send-button {
+  color: var(--Neutral-60);
+}
+
+.side-panel .input-container:not(.disabled) .input-content .send-button:hover {
+  color: var(--Neutral-90);
 }
 
 .side-panel .input-container .input-content .input-content-placeholder {

@@ -16,14 +16,6 @@ declare global {
   }
 }
 
-interface ImportMetaEnv {
-  PROD: boolean;
-}
-
-interface ImportMeta {
-  env: ImportMetaEnv;
-}
-
 const host = "generativelanguage.googleapis.com";
 const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
 const apiKeyStorageKey = "geminiApiKey";
@@ -117,9 +109,7 @@ const App = () => {
               onVideoStreamChange={setVideoStream}
               onFrameCapture={setLastCapturedFrame}
               hasApiKey={!!apiKey.trim()}
-            >
-              {/* put your own buttons here */}
-            </ControlTray>
+            />
           </main>
         </div>
       </LiveAPIProvider>

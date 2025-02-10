@@ -74,13 +74,17 @@ const App = () => {
 
               <div className="api-key-form">
                 <form onSubmit={handleApiKeySubmit}>
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your API key"
-                  />
-                  <button type="submit">Update</button>
+                  <label htmlFor="api-key">Gemini API Key</label>
+                  <div>
+                    <input
+                      id="api-key"
+                      type="password"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder="Enter your API key"
+                    />
+                    <button type="submit">Update</button>
+                  </div>
                 </form>
               </div>
             </div>

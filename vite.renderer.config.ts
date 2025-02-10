@@ -16,6 +16,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "src/apps/controls/index.html"),
+        cursor: path.resolve(__dirname, "src/apps/cursor/index.html"),
       },
     },
   },

@@ -94,7 +94,7 @@ const createCursorWindow = () => {
     transparent: true,
     fullscreenable: false,
     skipTaskbar: true,
-    roundedCorners: false,
+    roundedCorners: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,

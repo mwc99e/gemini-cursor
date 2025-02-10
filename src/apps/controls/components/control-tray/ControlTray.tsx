@@ -190,7 +190,7 @@ function ControlTray({
           className={cn("action-button mic-button")}
           onClick={() => setMuted(!muted)}
         >
-          {!muted ? <Mic size={24} /> : <MicOff size={24} />}
+          {!muted ? <Mic size={16} /> : <MicOff size={16} />}
         </button>
 
         <div className="action-button no-action outlined">
@@ -203,15 +203,15 @@ function ControlTray({
               isStreaming={screenCapture.isStreaming}
               start={changeStreams(screenCapture)}
               stop={changeStreams()}
-              onIcon={<MonitorOff size={24} />}
-              offIcon={<Monitor size={24} />}
+              onIcon={<MonitorOff size={16} />}
+              offIcon={<Monitor size={16} />}
             />
             <MediaStreamButton
               isStreaming={webcam.isStreaming}
               start={changeStreams(webcam)}
               stop={changeStreams()}
-              onIcon={<VideoOff size={24} />}
-              offIcon={<Video size={24} />}
+              onIcon={<VideoOff size={16} />}
+              offIcon={<Video size={16} />}
             />
           </>
         )}
@@ -227,7 +227,7 @@ function ControlTray({
             disabled={!hasApiKey}
             title={!hasApiKey ? "Please enter an API key first" : undefined}
           >
-            {connected ? <Pause size={24} /> : <Play size={24} />}
+            {connected ? <Pause size={16} /> : <Play size={16} />}
           </button>
         </div>
         <span className="text-indicator">Streaming</span>

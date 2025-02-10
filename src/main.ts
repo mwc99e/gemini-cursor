@@ -10,6 +10,7 @@ import {
   shell,
 } from "electron";
 import path from "node:path";
+import fs from "node:fs";
 import started from "electron-squirrel-startup";
 import { CursorController } from "@/apps/cursor/controller";
 
@@ -146,7 +147,28 @@ const createCursorWindow = () => {
   cursorController = new CursorController(cursorWindow);
 
   // Create Tray
-  const iconPath = path.join(app.getAppPath(), "resources", "white-logo.png");
+  let iconPath: string;
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    iconPath = path.join(process.cwd(), "resources", "white-logo.png");
+  } else {
+    // Try multiple possible locations
+    const possiblePaths = [
+      path.join(process.resourcesPath, "white-logo.png"),
+      path.join(app.getAppPath(), "..", "white-logo.png"),
+      path.join(app.getAppPath(), "resources", "white-logo.png"),
+    ];
+
+    iconPath =
+      possiblePaths.find((p) => {
+        try {
+          return fs.existsSync(p);
+        } catch {
+          return false;
+        }
+      }) || possiblePaths[0];
+  }
+
+  console.log("Icon path:", iconPath); // For debugging
   const icon = nativeImage.createFromPath(iconPath);
   tray = new Tray(icon.resize({ width: 20, height: 20 }));
 

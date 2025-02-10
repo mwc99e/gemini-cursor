@@ -1,8 +1,8 @@
 {
-  "name": "gemini-multimodal-desktop-cursor",
-  "productName": "gemini-multimodal-desktop-cursor",
+  "name": "gemini-cursor",
+  "productName": "gemini-cursor",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "An AI cursor for your desktop powered by Gemini",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",

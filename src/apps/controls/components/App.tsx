@@ -5,6 +5,7 @@ import cn from "classnames";
 import ControlTray from "@/apps/controls/components/control-tray/ControlTray";
 import SidePanel from "@/apps/controls/components/side-panel/SidePanel";
 import CursorControl from "@/apps/controls/components/CursorControl";
+import geminiLogo from "../../../../resources/gemini-logo.svg";
 
 // Add TypeScript declaration for the window.electronAPI
 declare global {
@@ -13,6 +14,14 @@ declare global {
       moveCursor: (x: number, y: number) => void;
     };
   }
+}
+
+interface ImportMetaEnv {
+  PROD: boolean;
+}
+
+interface ImportMeta {
+  env: ImportMetaEnv;
 }
 
 const host = "generativelanguage.googleapis.com";
@@ -52,7 +61,7 @@ const App = () => {
               <div className="header-container">
                 <div className="app-title-container">
                   <img
-                    src="../../../../resources/gemini-logo.svg"
+                    src={geminiLogo}
                     alt="Gemini Logo"
                     className="gemini-logo"
                   />

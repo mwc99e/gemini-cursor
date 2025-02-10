@@ -47,6 +47,7 @@ export type ControlTrayProps = {
   supportsVideo: boolean;
   onVideoStreamChange?: (stream: MediaStream | null) => void;
   onFrameCapture?: (base64Image: string) => void;
+  hasApiKey: boolean;
 };
 
 type MediaStreamButtonProps = {
@@ -79,6 +80,7 @@ function ControlTray({
   onVideoStreamChange = () => undefined,
   onFrameCapture = () => undefined,
   supportsVideo,
+  hasApiKey,
 }: ControlTrayProps) {
   const videoStreams = [useWebcam(), useScreenCapture()];
   const [activeVideoStream, setActiveVideoStream] =
@@ -222,6 +224,8 @@ function ControlTray({
             ref={connectButtonRef}
             className={cn("action-button connect-toggle", { connected })}
             onClick={connected ? disconnect : connect}
+            disabled={!hasApiKey}
+            title={!hasApiKey ? "Please enter an API key first" : undefined}
           >
             {connected ? <Pause size={24} /> : <Play size={24} />}
           </button>

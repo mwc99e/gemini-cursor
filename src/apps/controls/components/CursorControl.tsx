@@ -93,9 +93,11 @@ async function getPointsFromImage(
   base64Image: string,
   points: { description: string; delay: number }[]
 ) {
-  // @ts-expect-error import.meta.env is injected by Vite
-  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
-  const genAI = new GoogleGenerativeAI(API_KEY);
+  const apiKey = localStorage.getItem("geminiApiKey");
+  if (!apiKey) {
+    throw new Error("API key not found in localStorage");
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: "models/gemini-2.0-flash-exp",
   });

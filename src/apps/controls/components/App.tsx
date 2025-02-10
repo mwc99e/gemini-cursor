@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import "@/apps/controls/index.css";
 import { LiveAPIProvider } from "@/apps/controls/contexts/LiveAPIContext";
 import cn from "classnames";
@@ -15,31 +15,54 @@ declare global {
   }
 }
 
-// @ts-expect-error import.meta.env is injected by Vite
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
-if (typeof API_KEY !== "string") {
-  throw new Error("set VITE_GEMINI_API_KEY in .env");
-}
-
 const host = "generativelanguage.googleapis.com";
 const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
+const apiKeyStorageKey = "geminiApiKey";
 
 const App = () => {
-  // this video reference is used for displaying the active stream, whether that is the webcam or screen capture
-  // feel free to style as you see fit
+  const [apiKey, setApiKey] = useState<string>("");
+
   const videoRef = useRef<HTMLVideoElement>(null);
-  // either the screen capture, the video or null, if null we hide it
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [lastCapturedFrame, setLastCapturedFrame] = useState<string | null>(
     null
   );
 
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem(apiKeyStorageKey);
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  const handleApiKeySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (apiKey.trim()) {
+      localStorage.setItem(apiKeyStorageKey, apiKey);
+    }
+  };
+
   return (
     <div className="App">
-      <LiveAPIProvider url={uri} apiKey={API_KEY}>
+      <LiveAPIProvider url={uri} apiKey={apiKey}>
         <div className="streaming-console">
           <SidePanel />
           <main>
+            <div className="api-key-form-container">
+              <h1 className="app-title">Gemini Cursor</h1>
+              <div className="api-key-form">
+                <form onSubmit={handleApiKeySubmit}>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                  />
+                  <button type="submit">Update</button>
+                </form>
+              </div>
+            </div>
+
             <div className="main-app-area">
               <CursorControl lastCapturedFrame={lastCapturedFrame} />
 
@@ -58,6 +81,7 @@ const App = () => {
               supportsVideo={true}
               onVideoStreamChange={setVideoStream}
               onFrameCapture={setLastCapturedFrame}
+              hasApiKey={!!apiKey.trim()}
             >
               {/* put your own buttons here */}
             </ControlTray>

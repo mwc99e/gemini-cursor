@@ -99,6 +99,18 @@
   color: var(--Neutral-5);
 }
 
+.connect-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--Neutral-30) !important;
+  color: var(--Neutral-60) !important;
+}
+
+.connect-toggle:disabled:hover {
+  background-color: var(--Neutral-30) !important;
+  border-color: transparent !important;
+}
+
 .control-tray {
   position: absolute;
   bottom: 0;

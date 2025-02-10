@@ -49,7 +49,29 @@ const App = () => {
           <SidePanel />
           <main>
             <div className="api-key-form-container">
-              <h1 className="app-title">Gemini Cursor</h1>
+              <div className="header-container">
+                <div className="app-title-container">
+                  <img
+                    src="../../../../resources/gemini-logo.svg"
+                    alt="Gemini Logo"
+                    className="gemini-logo"
+                  />
+
+                  <h1 className="app-title">Gemini Cursor</h1>
+                </div>
+
+                <p>
+                  Made with ✨️ by{" "}
+                  <a
+                    href="https://x.com/27upon2"
+                    target="_system"
+                    rel="noopener noreferrer"
+                  >
+                    @27upon2
+                  </a>
+                </p>
+              </div>
+
               <div className="api-key-form">
                 <form onSubmit={handleApiKeySubmit}>
                   <input

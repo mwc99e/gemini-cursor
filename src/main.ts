@@ -6,6 +6,8 @@ import {
   ipcMain,
   session,
   desktopCapturer,
+  nativeImage,
+  shell,
 } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
@@ -34,6 +36,12 @@ const createControlWindow = () => {
       webSecurity: true,
       sandbox: false,
     },
+  });
+
+  // Handle external links
+  controlWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: "deny" };
   });
 
   // Enable screen capture permissions
@@ -138,8 +146,9 @@ const createCursorWindow = () => {
   cursorController = new CursorController(cursorWindow);
 
   // Create Tray
-  const iconPath = path.join(app.getAppPath(), "resources", "gemini-logo.png");
-  tray = new Tray(iconPath);
+  const iconPath = path.join(app.getAppPath(), "resources", "white-logo.png");
+  const icon = nativeImage.createFromPath(iconPath);
+  tray = new Tray(icon.resize({ width: 20, height: 20 }));
 
   const contextMenu = Menu.buildFromTemplate([
     {

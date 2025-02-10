@@ -8,6 +8,8 @@ import {
   desktopCapturer,
   nativeImage,
   shell,
+  dialog,
+  systemPreferences,
 } from "electron";
 import path from "node:path";
 import fs from "node:fs";
@@ -24,6 +26,141 @@ let cursorWindow: BrowserWindow | null = null;
 let controlWindow: BrowserWindow | null = null;
 let cursorController: CursorController | null = null;
 
+// Store granted permissions in memory and persist them
+const grantedPermissions = new Set<string>();
+
+// Load persisted permissions
+const loadPersistedPermissions = () => {
+  const userDataPath = app.getPath("userData");
+  const permissionsPath = path.join(userDataPath, "permissions.json");
+
+  try {
+    if (fs.existsSync(permissionsPath)) {
+      const data = JSON.parse(fs.readFileSync(permissionsPath, "utf-8"));
+      data.permissions.forEach((p: string) => grantedPermissions.add(p));
+    }
+  } catch (error) {
+    console.error("Error loading permissions:", error);
+  }
+};
+
+// Save permissions to disk
+const savePermissions = () => {
+  const userDataPath = app.getPath("userData");
+  const permissionsPath = path.join(userDataPath, "permissions.json");
+
+  try {
+    fs.writeFileSync(
+      permissionsPath,
+      JSON.stringify({ permissions: Array.from(grantedPermissions) }),
+      "utf-8"
+    );
+  } catch (error) {
+    console.error("Error saving permissions:", error);
+  }
+};
+
+const checkSystemPermission = (permission: string) => {
+  if (process.platform === "darwin") {
+    if (
+      permission === "screen" ||
+      permission === "desktopCapture" ||
+      permission === "display-capture"
+    ) {
+      return systemPreferences.getMediaAccessStatus("screen") === "granted";
+    }
+    if (permission === "media") {
+      return (
+        systemPreferences.getMediaAccessStatus("camera") === "granted" ||
+        systemPreferences.getMediaAccessStatus("microphone") === "granted"
+      );
+    }
+  }
+  return false;
+};
+
+const requestAppPermissions = async (window: BrowserWindow) => {
+  try {
+    // Set up a single permission request handler for the window
+    window.webContents.session.setPermissionRequestHandler(
+      async (webContents, permission, callback, details) => {
+        const allowedPermissions = [
+          "media",
+          "display-capture",
+          "screen",
+          "desktopCapture",
+        ] as const;
+
+        // Check if this is a supported permission type
+        if (
+          allowedPermissions.includes(
+            permission as (typeof allowedPermissions)[number]
+          )
+        ) {
+          // First check system level permissions
+          if (checkSystemPermission(permission)) {
+            grantedPermissions.add(permission);
+            savePermissions();
+            callback(true);
+            return;
+          }
+
+          // Then check our stored permissions
+          if (grantedPermissions.has(permission)) {
+            callback(true);
+            return;
+          }
+
+          // Show a permission request dialog to the user
+          const { response } = await dialog.showMessageBox(window, {
+            type: "question",
+            buttons: ["Allow", "Deny"],
+            defaultId: 0,
+            title: "Permission Request",
+            message: `This app needs ${permission} permission to function properly.`,
+            detail: "Please allow access to continue using the app.",
+          });
+
+          const isGranted = response === 0;
+
+          // Store the permission choice if granted
+          if (isGranted) {
+            grantedPermissions.add(permission);
+            savePermissions();
+          }
+
+          callback(isGranted);
+        } else {
+          callback(false);
+        }
+      }
+    );
+
+    // Set up permission check handler to be consistent with request handler
+    window.webContents.session.setPermissionCheckHandler(
+      (webContents, permission) => {
+        const allowedPermissions = [
+          "media",
+          "display-capture",
+          "screen",
+          "desktopCapture",
+        ] as const;
+
+        // Check both system and stored permissions
+        return (
+          allowedPermissions.includes(
+            permission as (typeof allowedPermissions)[number]
+          ) &&
+          (checkSystemPermission(permission) ||
+            grantedPermissions.has(permission))
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error requesting permissions:", error);
+  }
+};
+
 const createControlWindow = () => {
   controlWindow = new BrowserWindow({
     width: 1000,
@@ -39,42 +176,18 @@ const createControlWindow = () => {
     },
   });
 
+  // Request permissions when window is ready
+  controlWindow.webContents.on("did-finish-load", () => {
+    if (controlWindow) {
+      requestAppPermissions(controlWindow);
+    }
+  });
+
   // Handle external links
   controlWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: "deny" };
   });
-
-  // Enable screen capture permissions
-  controlWindow.webContents.session.setPermissionCheckHandler(
-    (webContents, permission) => {
-      const allowedPermissions = [
-        "media",
-        "display-capture",
-        "screen",
-        "desktopCapture",
-      ] as const;
-      return allowedPermissions.includes(
-        permission as (typeof allowedPermissions)[number]
-      );
-    }
-  );
-
-  controlWindow.webContents.session.setPermissionRequestHandler(
-    (webContents, permission, callback) => {
-      const allowedPermissions = [
-        "media",
-        "display-capture",
-        "screen",
-        "desktopCapture",
-      ] as const;
-      callback(
-        allowedPermissions.includes(
-          permission as (typeof allowedPermissions)[number]
-        )
-      );
-    }
-  );
 
   // Set additional required permissions
   controlWindow.webContents.session.webRequest.onHeadersReceived(
@@ -168,7 +281,6 @@ const createCursorWindow = () => {
       }) || possiblePaths[0];
   }
 
-  console.log("Icon path:", iconPath); // For debugging
   const icon = nativeImage.createFromPath(iconPath);
   tray = new Tray(icon.resize({ width: 20, height: 20 }));
 
@@ -201,21 +313,8 @@ app.commandLine.appendSwitch("enable-features", "WebRTCPipeWireCapturer");
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Enable screen capture
-  session.defaultSession.setPermissionRequestHandler(
-    (webContents, permission, callback) => {
-      const allowedPermissions = [
-        "media",
-        "display-capture",
-        "screen",
-      ] as const;
-      callback(
-        allowedPermissions.includes(
-          permission as (typeof allowedPermissions)[number]
-        )
-      );
-    }
-  );
+  // Load persisted permissions at startup
+  loadPersistedPermissions();
 
   // Set up display media request handler
   session.defaultSession.setDisplayMediaRequestHandler(

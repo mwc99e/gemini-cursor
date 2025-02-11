@@ -42,6 +42,7 @@ Created by [@13point5](https://x.com/27upon2).
 
 ```bash
 git clone https://github.com/13point5/gemini-cursor.git
+cd gemini-cursor
 ```
 
 2. Install dependencies

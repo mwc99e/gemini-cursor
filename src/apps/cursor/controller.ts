@@ -1,8 +1,8 @@
 import { BrowserWindow, screen } from "electron";
 
 export class CursorController {
-  private cursorX = 100;
-  private cursorY = 100;
+  private cursorX = 500;
+  private cursorY = 500;
   private isAnimating = false;
   private animationInterval: NodeJS.Timeout | null = null;
   private mainWindow: BrowserWindow | null = null;

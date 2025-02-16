@@ -41,6 +41,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@C0RE-SHARED/schemas": "file:../C0RE-SHARED/schemas",
+    "@C0RE-SHARED/types": "file:../C0RE-SHARED/types",
+    "@C0RE-SHARED/vault": "file:../C0RE-SHARED/vault",
+    "@types/prismjs": "^1.26.5",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
@@ -49,9 +53,10 @@
     "eventemitter3": "^5.0.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.475.0",
+    "prismjs": "^1.29.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-syntax-highlighter": "^15.6.1",
+    "scheduler": "^0.25.0",
     "zustand": "^5.0.3"
   }
 }
